@@ -1,0 +1,120 @@
+---
+title: "Ordenar categorías con forcats"
+subtitle: "Tarea 1 - Fundamentos de R"
+author: "Ximena Pinillos Zegarra"
+date: today
+lang: es
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-title: "Contenido"
+    toc-depth: 2
+    code-fold: false
+    embed-resources: true
+    theme: [cosmo, morado.scss]
+execute:
+  warning: false
+  message: false
+---
+
+## ¿Qué hace `fct_reorder()` y para qué sirve?
+
+Cuando en R una variable categórica es un factor, sus categorías tienen un orden interno, que se llaman niveles. Si yo no hago nada, ese orden es alfabético. Eso es un problema sobre todo en los gráficos: los departamentos salen de la A a la Z, pero a mí lo que me interesa es ver quién está más arriba y quién más abajo.
+
+`fct_reorder()`, del paquete **forcats**, sirve justo para eso: le digo qué variable numérica quiero usar como criterio y ella reordena los niveles del factor según esos valores. Los argumentos principales son:
+
+- `.f`: el factor (o texto) que quiero reordenar.
+- `.x`: la variable numérica que decide el orden.
+- `.fun`: el resumen que se calcula de `.x` para cada categoría. Por defecto es la mediana, pero muchas veces me conviene `mean` o `sum`.
+- `.desc`: si quiero el orden de mayor a menor (`TRUE`). Por defecto es de menor a mayor.
+
+Como apoyo también usaré otras dos funciones de forcats para preparar la data: `fct_recode()`, que cambia el nombre de las categorías (por ejemplo, de un código 1, 2, 3 a un texto que se entienda), y `fct_collapse()`, que junta varias categorías en una sola.
+
+## Ejemplo: ¿cómo se evalúa a los gobiernos regionales?
+
+Uso la ENAHO 2025, Módulo  de Gobernabilidad, Democracia y Transparencia del INEI. En la pregunta 2A1 le piden a cada persona de 18 años o más que califique la gestión del Gobierno Regional como *muy buena, buena, mala, muy mala* o *no sabe, no respinde*. Quiero comparar qué tan mal calificada está esa gestión entre departamentos. 
+```{r}
+library(tidyverse)  
+
+url_datos <- "https://raw.githubusercontent.com/ximenapize/r_repository/main/enaho2025_gestion.csv"
+enaho <- read_csv(url_datos, show_col_types = FALSE)
+
+count(enaho, gestion_regional)
+```
+
+Los códigos vienen como números (1 a 5), así que primero les pongo nombre con `fct_recode()` y después junto las calificaciones buenas por un lado y las malas por otro con `fct_collapse()`:
+
+```{r}
+enaho <- enaho |>
+  mutate(
+    gestion = fct_recode(factor(gestion_regional),
+                         "Muy buena" = "1", "Buena" = "2",
+                         "Mala" = "3", "Muy mala" = "4", "No sabe" = "5"),
+    valoracion = fct_collapse(gestion,
+                              Aprueba    = c("Muy buena", "Buena"),
+                              Desaprueba = c("Mala", "Muy mala"))
+  )
+
+count(enaho, gestion, valoracion)
+```
+
+Ahora calculo por departamento qué porcentaje aprueba y cuál desaprueba. Como la ENAHO es una encuesta por muestreo, pondero cada respuesta con el factor de expansión del módulo `FAMIEGOB07`, para que el resultado represente a la población de cada departamento. 
+
+```{r}
+desaprobacion <- enaho |>
+  group_by(departamento) |>
+  summarise(pct_aprueba    = weighted.mean(valoracion == "Aprueba",    w = factor) * 100,
+            pct_desaprueba = weighted.mean(valoracion == "Desaprueba", w = factor) * 100,
+            pct_no_sabe    = weighted.mean(valoracion == "No sabe",    w = factor) * 100,
+            n = n())
+
+desaprobacion |> slice_head(n = 5)
+```
+
+**Sin `fct_reorder()`**, el gráfico sale en orden alfabético.
+
+```{r}
+#| fig-height: 6
+ggplot(desaprobacion, aes(x = pct_desaprueba, y = departamento)) +
+  geom_col(fill = "grey60") +
+  labs(x = "% que desaprueba la gestión regional", y = NULL,
+       title = "Aprobación de la gestión de los gobiernos regionales")
+```
+
+**Con `fct_reorder()`**, ordeno los departamentos según su pct_desaprueba:
+
+```{r}
+#| fig-height: 6
+desaprobacion |>
+  mutate(departamento = fct_reorder(departamento, pct_desaprueba)) |>
+  ggplot(aes(x = pct_desaprueba, y = departamento)) +
+  geom_col(fill = "darkblue") +
+  labs(x = "% que desaprueba la gestión regional", y = NULL,
+       title = "Desaprobación de la gestión del Gobierno Regional, 2025")
+```
+
+```{r}
+#| include: false
+alto <- desaprobacion |> slice_max(pct_desaprueba, n = 1)
+bajo <- desaprobacion |> slice_min(pct_desaprueba, n = 1)
+```
+
+## Interpretación
+
+`fct_reorder()` no cambió ningún dato. Los porcentajes son  los mismos en los dos gráficos. Lo  que hizo fue devolverme la columna `departamento` como un factor con los niveles en otro orden, y `ggplot2` dibuja las barras siguiendo ese orden. Con el orden alfabético es dificil poder comparar, con el reordenado es mucho más fácil la comparación.
+
+En este caso, el departamento donde más desaprueban a su gobierno regional es **`r alto$departamento`** (`r round(alto$pct_desaprueba, 1)`% de quienes opinaron), y el que menos lo desaprueba es **`r bajo$departamento`** (`r round(bajo$pct_desaprueba, 1)`%). Lo que me llevo es que esta función sirve  para poder ordenar la narrativa de lo que deseo graficar u mostrar. Un gráfico ordenado responde por el mismo la pregunta "¿quién está mejor y quién peor?".
+
+## Limitación y cuidados
+
+- **Necesita una variable numérica lista.** `.x` tiene que ser un número que yo ya tenga o construya antes. Si le paso datos a nivel de persona y dejo la .fun por defecto (mediana), el orden puede no ser el que necesito.
+- **No sirve para factores con un orden natural.** Si las categorías ya van en una escala (como "muy buena → muy mala"), reordenarlas por otra variable rompe esa lógica. En ese caso conviene dejarlas como están o mover solo algunas con `fct_relevel()`.
+- **Alternativas:** `fct_infreq()` para ordenar por frecuencia, `fct_reorder2()` cuando el orden depende de dos variables, por ejemplo, en gráficos de líneas, y `reorder()` de R base, que hace algo similar
+
+## Fuentes
+
+- Documentación de fct_reorder() (forcats): <https://forcats.tidyverse.org/reference/fct_reorder.html>. 
+- Preguntas frecuentes de ggplot2, "Reordering": <https://ggplot2.tidyverse.org/articles/faq-reordering.html>.
+- Cheat sheet de factores (forcats): <https://rstudio.github.io/cheatsheets/factors.pdf>.
+- INEI. *Encuesta Nacional de Hogares (ENAHO) 2025, Módulo de Gobernabilidad, Democracia y Transparencia*. 

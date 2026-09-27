@@ -1,0 +1,27 @@
+/*-- scss:defaults --*/
+$primary: #6f42c1;
+$link-color: #6f42c1;
+$link-hover-color: #4a2a8a;
+$headings-color: #4a2a8a;
+
+/*-- scss:rules --*/
+// Menú lateral izquierdo (estructura del documento)
+#TOC .nav-link.active,
+nav#TOC a.active,
+#quarto-margin-sidebar .sidebar-navigation a.active {
+  color: #6f42c1 !important;
+  border-left-color: #6f42c1 !important;
+  font-weight: 600;
+}
+#quarto-margin-sidebar h2 {
+  color: #4a2a8a;
+  font-weight: 700;
+}
+#quarto-margin-sidebar {
+  border-right: 1px solid #e3d9f5;
+}
+
+// Encabezado del documento
+.quarto-title-block .title { color: #4a2a8a; }
+.quarto-title-block .subtitle { color: #6f42c1; }
+h2 { border-bottom: 2px solid #e3d9f5; padding-bottom: .25rem; }
