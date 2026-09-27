@@ -3088,7 +3088,7 @@ vertical-align: -.125em;
   <li><a href="#qué-hace-fct_reorder-y-para-qué-sirve" id="toc-qué-hace-fct_reorder-y-para-qué-sirve" class="nav-link active" data-scroll-target="#qué-hace-fct_reorder-y-para-qué-sirve">¿Qué hace <code>fct_reorder()</code> y para qué sirve?</a></li>
   <li><a href="#ejemplo-cómo-se-evalúa-a-los-gobiernos-regionales" id="toc-ejemplo-cómo-se-evalúa-a-los-gobiernos-regionales" class="nav-link" data-scroll-target="#ejemplo-cómo-se-evalúa-a-los-gobiernos-regionales">Ejemplo: ¿cómo se evalúa a los gobiernos regionales?</a></li>
   <li><a href="#interpretación" id="toc-interpretación" class="nav-link" data-scroll-target="#interpretación">Interpretación</a></li>
-  <li><a href="#limitación-y-cuidados" id="toc-limitación-y-cuidados" class="nav-link" data-scroll-target="#limitación-y-cuidados">Limitación y cuidados</a></li>
+  <li><a href="#limitaciones" id="toc-limitaciones" class="nav-link" data-scroll-target="#limitaciones">Limitaciones</a></li>
   <li><a href="#fuentes" id="toc-fuentes" class="nav-link" data-scroll-target="#fuentes">Fuentes</a></li>
   </ul>
 </nav>
@@ -3240,15 +3240,15 @@ vertical-align: -.125em;
 </section>
 <section id="interpretación" class="level2">
 <h2 class="anchored" data-anchor-id="interpretación">Interpretación</h2>
-<p><code>fct_reorder()</code> no cambió ningún dato. Los porcentajes son los mismos en los dos gráficos. Lo que hizo fue devolverme la columna <code>departamento</code> como un factor con los niveles en otro orden, y <code>ggplot2</code> dibuja las barras siguiendo ese orden. Con el orden alfabético es dificil poder comparar, con el reordenado es mucho más fácil la comparación.</p>
-<p>En este caso, el departamento donde más desaprueban a su gobierno regional es <strong>Tumbes</strong> (91.8% de quienes opinaron), y el que menos lo desaprueba es <strong>Puno</strong> (45.5%). Lo que me llevo es que esta función sirve para poder ordenar la narrativa de lo que deseo graficar u mostrar. Un gráfico ordenado responde por el mismo la pregunta “¿quién está mejor y quién peor?”.</p>
+<p><code>fct_reorder()</code> no cambió ningún dato. Los porcentajes son los mismos en los dos gráficos. Lo que hizo fue devolverme la columna <code>departamento</code> como un factor con los niveles en otro orden, y <code>ggplot2</code> dibuja las barras siguiendo ese orden. Con el orden alfabético es dificil comparar, con el reordenado es mucho más fácil.</p>
+<p>En este caso, el departamento donde más desaprueban a su gobierno regional es <strong>Tumbes</strong> (91.8% de quienes opinaron), y el que menos lo desaprueba es <strong>Puno</strong> (45.5%). Esta función sirve para poder ordenar la narrativa de lo que deseo graficar u mostrar. Un gráfico ordenado responde por el mismo la pregunta “¿quién está mejor y quién peor?”.</p>
 </section>
-<section id="limitación-y-cuidados" class="level2">
-<h2 class="anchored" data-anchor-id="limitación-y-cuidados">Limitación y cuidados</h2>
+<section id="limitaciones" class="level2">
+<h2 class="anchored" data-anchor-id="limitaciones">Limitaciones</h2>
 <ul>
 <li><strong>Necesita una variable numérica lista.</strong> <code>.x</code> tiene que ser un número que yo ya tenga o construya antes. Si le paso datos a nivel de persona y dejo la .fun por defecto (mediana), el orden puede no ser el que necesito.</li>
-<li><strong>No sirve para factores con un orden natural.</strong> Si las categorías ya van en una escala (como “muy buena → muy mala”), reordenarlas por otra variable rompe esa lógica. En ese caso conviene dejarlas como están o mover solo algunas con <code>fct_relevel()</code>.</li>
-<li><strong>Alternativas:</strong> <code>fct_infreq()</code> para ordenar por frecuencia, <code>fct_reorder2()</code> cuando el orden depende de dos variables, por ejemplo, en gráficos de líneas, y <code>reorder()</code> de R base, que hace algo similar</li>
+<li><strong>No sirve para factores con un orden natural.</strong> Si las categorías ya van en una escala, como “muy buena → muy mala”, reordenarlas por otra variable rompería esa lógica. En ese caso conviene dejarlas como están o mover solo algunas con <code>fct_relevel()</code>.</li>
+<li><strong>Alternativas:</strong> <code>fct_infreq()</code> para ordenar por frecuencia, <code>fct_reorder2()</code> cuando el orden depende de dos variables, por ejemplo, en gráficos de líneas, y <code>reorder()</code> de R base.</li>
 </ul>
 </section>
 <section id="fuentes" class="level2">

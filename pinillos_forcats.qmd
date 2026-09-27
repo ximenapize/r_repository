@@ -102,15 +102,15 @@ bajo <- desaprobacion |> slice_min(pct_desaprueba, n = 1)
 
 ## Interpretación
 
-`fct_reorder()` no cambió ningún dato. Los porcentajes son  los mismos en los dos gráficos. Lo  que hizo fue devolverme la columna `departamento` como un factor con los niveles en otro orden, y `ggplot2` dibuja las barras siguiendo ese orden. Con el orden alfabético es dificil poder comparar, con el reordenado es mucho más fácil la comparación.
+`fct_reorder()` no cambió ningún dato. Los porcentajes son  los mismos en los dos gráficos. Lo  que hizo fue devolverme la columna `departamento` como un factor con los niveles en otro orden, y `ggplot2` dibuja las barras siguiendo ese orden. Con el orden alfabético es dificil comparar, con el reordenado es mucho más fácil.
 
-En este caso, el departamento donde más desaprueban a su gobierno regional es **`r alto$departamento`** (`r round(alto$pct_desaprueba, 1)`% de quienes opinaron), y el que menos lo desaprueba es **`r bajo$departamento`** (`r round(bajo$pct_desaprueba, 1)`%). Lo que me llevo es que esta función sirve  para poder ordenar la narrativa de lo que deseo graficar u mostrar. Un gráfico ordenado responde por el mismo la pregunta "¿quién está mejor y quién peor?".
+En este caso, el departamento donde más desaprueban a su gobierno regional es **`r alto$departamento`** (`r round(alto$pct_desaprueba, 1)`% de quienes opinaron), y el que menos lo desaprueba es **`r bajo$departamento`** (`r round(bajo$pct_desaprueba, 1)`%). Esta función sirve  para poder ordenar la narrativa de lo que deseo graficar u mostrar. Un gráfico ordenado responde por el mismo la pregunta "¿quién está mejor y quién peor?".
 
-## Limitación y cuidados
+## Limitaciones
 
 - **Necesita una variable numérica lista.** `.x` tiene que ser un número que yo ya tenga o construya antes. Si le paso datos a nivel de persona y dejo la .fun por defecto (mediana), el orden puede no ser el que necesito.
-- **No sirve para factores con un orden natural.** Si las categorías ya van en una escala (como "muy buena → muy mala"), reordenarlas por otra variable rompe esa lógica. En ese caso conviene dejarlas como están o mover solo algunas con `fct_relevel()`.
-- **Alternativas:** `fct_infreq()` para ordenar por frecuencia, `fct_reorder2()` cuando el orden depende de dos variables, por ejemplo, en gráficos de líneas, y `reorder()` de R base, que hace algo similar
+- **No sirve para factores con un orden natural.** Si las categorías ya van en una escala, como "muy buena → muy mala", reordenarlas por otra variable rompería esa lógica. En ese caso conviene dejarlas como están o mover solo algunas con `fct_relevel()`.
+- **Alternativas:** `fct_infreq()` para ordenar por frecuencia, `fct_reorder2()` cuando el orden depende de dos variables, por ejemplo, en gráficos de líneas, y `reorder()` de R base.
 
 ## Fuentes
 
